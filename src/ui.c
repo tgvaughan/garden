@@ -3,19 +3,18 @@
 #include <string.h>
 #include <ncurses.h>
 
-#include "garden.h"
+#include "ui.h"
 
 WINDOW *top_view, *side_view;
 
 char *top_view_title = "Top View";
 char *side_view_title = "Side View";
 
-
-void init() {
+void ui_init() {
   initscr();
 
   if (has_colors() == FALSE) {
-    shutdown();
+    ui_shutdown();
     printf("Terminal lacks colour support.");
     exit(1);
   }
@@ -30,7 +29,7 @@ void init() {
   side_view = newwin(0,COLS/2,0,COLS/2);
 }
 
-void refresh_all() {
+void ui_refresh() {
   wborder(top_view, 0, 0, 0, 0, 0, 0, 0, 0);
   wborder(side_view, 0, 0, 0, 0, 0, 0, 0, 0);
 
@@ -46,25 +45,17 @@ void refresh_all() {
   wrefresh(side_view);
 }
 
-void shutdown() {
+void ui_shutdown() {
   endwin();
 }
 
-int main(int argc, char **argv) {
+void ui_eventLoop() {
 
-  init();
+  ui_init();
 
-  init_pair(1, COLOR_GREEN, COLOR_BLACK);
-
-  wattron(top_view, COLOR_PAIR(1));
-  mvwprintw(top_view, 10, 10, "Hello, world!");
-  wattroff(top_view, COLOR_PAIR(1));
-
-  refresh_all();
+  ui_refresh();
   
   wgetch(top_view);
 
-  shutdown();
-
-  return 0;
+  ui_shutdown();
 }
