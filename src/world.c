@@ -41,7 +41,6 @@ double getNoiseMag(int disp, double amp, double exponent) {
  */
 void world_genTerrain() {
 
-
   double noiseAmp = 0.1;
   double noiseExp = 1.0;
 
@@ -49,12 +48,11 @@ void world_genTerrain() {
 
   double heightMap[N][N];
 
-  printf("Hey.\n");
-
   heightMap[0][0] = 0.5;
   heightMap[0][N-1] = 0.5;
   heightMap[N-1][0] = 0.5;
   heightMap[N-1][N-1] = 0.5;
+
 
   int l = N - 1;
 
@@ -84,46 +82,46 @@ void world_genTerrain() {
       }
     }
 
-    if (l/2 < 1)
+    l /= 2;
+
+    if (l < 1)
       break;
 
     printf("Squares...");
 
-    for (int yc=0; yc<N; yc += l/2) {
-      int offset = (((yc-1)/(l/2) + 1)%2)*(l/2);
-      for (int xc=offset; xc<N; xc += l) {
+    for (int yc=0; yc<N; yc += l) {
+      int offset = (((yc-1)/l + 1)%2)*l;
+      for (int xc=offset; xc<N; xc += 2*l) {
 
         double cHeight = 0;
         int sides = 0;
 
-        if (xc-l/2 >= 0) {
-          cHeight = cHeight + heightMap[xc-l/2][yc];
+        if (xc-l >= 0) {
+          cHeight = cHeight + heightMap[xc-l][yc];
           sides += 1;
         }
 
-        if (xc+l/2 <= N-1) {
-          cHeight = cHeight + heightMap[xc+l/2][yc];
+        if (xc+l <= N-1) {
+          cHeight = cHeight + heightMap[xc+l][yc];
           sides += 1;
         }
 
-        if (yc-l/2 >= 0) {
-          cHeight = cHeight + heightMap[xc][yc-l/2];
+        if (yc-l >= 0) {
+          cHeight = cHeight + heightMap[xc][yc-l];
           sides += 1;
         }
 
-        if (yc+l/2 <= N-1) {
-          cHeight = cHeight + heightMap[xc][yc+l/2];
+        if (yc+l <= N-1) {
+          cHeight = cHeight + heightMap[xc][yc+l];
           sides += 1;
         }
 
         cHeight /= sides;
 
-        double noiseMag = getNoiseMag(0.5*l/(double)N, noiseAmp, noiseExp);
+        double noiseMag = getNoiseMag(l/(double)N, noiseAmp, noiseExp);
         heightMap[xc][yc] = cHeight + noiseMag*(drand48()-0.5);
       }
     }
-
-    l /= 2;
   }
 
   for (int x=0; x<N; x++) {
