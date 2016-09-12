@@ -4,6 +4,8 @@
 
 #include "world.h"
 
+#define idx(N,x,y) (((N)*(x))+(y))
+
 Voxel *getVoxel(int x, int y, int z) {
   return &(world.voxels[z*world.params->Nx*world.params->Ny
                         + y*world.params->Nx
@@ -46,13 +48,13 @@ void world_genTerrain() {
 
   int N = world.params->Nx;
 
-  double heightMap[N][N];
+  double *heightMap;
+  heightMap = (double *)malloc(sizeof(double)*N*N);
 
-  heightMap[0][0] = 0.5;
-  heightMap[0][N-1] = 0.5;
-  heightMap[N-1][0] = 0.5;
-  heightMap[N-1][N-1] = 0.5;
-
+  heightMap[idx(N,0,0)] = 0.5;
+  heightMap[idx(N,0,N-1)] = 0.5;
+  heightMap[idx(N,N-1,0)] = 0.5;
+  heightMap[idx(N,N-1,N-1)] = 0.5;
 
   int l = N - 1;
 
@@ -73,12 +75,12 @@ void world_genTerrain() {
         int cx = x0 + (l/2);
         int cy = y0 + (l/2);
 
-        double cHeight = 0.25*(heightMap[x0][x0] + heightMap[x0][y1]
-                               + heightMap[x1][y0] + heightMap[x1][y1]);
+        double cHeight = 0.25*(heightMap[idx(N,x0,y0)] + heightMap[idx(N,x0,y1)]
+                               + heightMap[idx(N,x1,y0)] + heightMap[idx(N,x1,y1)]);
 
         double noiseMag = getNoiseMag(l/(double)N, noiseAmp, noiseExp);
 
-        heightMap[cx][cy] = cHeight + noiseMag*(drand48()-0.5);
+        heightMap[idx(N,cx,cy)] = cHeight + noiseMag*(drand48()-0.5);
       }
     }
 
@@ -97,38 +99,42 @@ void world_genTerrain() {
         int sides = 0;
 
         if (xc-l >= 0) {
-          cHeight = cHeight + heightMap[xc-l][yc];
+          cHeight = cHeight + heightMap[idx(N,xc-l,yc)];
           sides += 1;
         }
 
         if (xc+l <= N-1) {
-          cHeight = cHeight + heightMap[xc+l][yc];
+          cHeight = cHeight + heightMap[idx(N,xc+l,yc)];
           sides += 1;
         }
 
         if (yc-l >= 0) {
-          cHeight = cHeight + heightMap[xc][yc-l];
+          cHeight = cHeight + heightMap[idx(N,xc,yc-l)];
           sides += 1;
         }
 
         if (yc+l <= N-1) {
-          cHeight = cHeight + heightMap[xc][yc+l];
+          cHeight = cHeight + heightMap[idx(N,xc,yc+l)];
           sides += 1;
         }
 
         cHeight /= sides;
 
         double noiseMag = getNoiseMag(l/(double)N, noiseAmp, noiseExp);
-        heightMap[xc][yc] = cHeight + noiseMag*(drand48()-0.5);
+        heightMap[idx(N,xc,yc)] = cHeight + noiseMag*(drand48()-0.5);
       }
     }
   }
 
+  printf("Translating heightmap to terrain..."); fflush(stdout);
   for (int x=0; x<N; x++) {
     for (int y=0; y<N; y++) {
-      setTerrainHeight(x, y, (int)(world.params->Nz*heightMap[x][y]));
+      setTerrainHeight(x, y, (int)(world.params->Nz*heightMap[idx(N,x,y)]));
     }
   }
+  printf("done.\n");
+
+  free(heightMap);
 }
 
 void world_destroy() {
