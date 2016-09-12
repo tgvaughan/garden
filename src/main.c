@@ -4,10 +4,11 @@
 int main(int argc, char **argv) {
 
   WorldParams worldParams;
-  worldParams.Nx = 1000;
-  worldParams.Ny = 1000;
+  worldParams.Nx = 1024 + 1;
+  worldParams.Ny = 1024 + 1;
   worldParams.Nz = 100;
   world_init(&worldParams);
+  world_genTerrain();
 
   ui_eventLoop();
 

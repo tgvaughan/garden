@@ -13,6 +13,5 @@ struct {
 } world;
 
 void world_init(WorldParams *);
-void world_destroy();
 void world_genTerrain();
-void world_setTerrainHeight();
+void world_destroy();
